@@ -1,18 +1,18 @@
 <template>
   <section>
-    <div>
+    <div class="container">
       <table>
         <tr>
           <th>Due Date</th>
           <th>Bill</th>
           <th>Amount</th>
-          <th>Payment</th>
+          <th>Source</th>
         </tr>
         <tr>
-          <td>21st</td>
-          <td>Tithing/Fast Offering</td>
-          <td>$100</td>
-          <td>LDS Account</td>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
+          <td contenteditable="true"></td>
         </tr>
       </table>
     </div>

@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div>
+    <div class="container">
       <p>This is the notes page</p>
     </div>
   </section>
