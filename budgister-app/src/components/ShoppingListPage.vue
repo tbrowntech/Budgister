@@ -1,12 +1,21 @@
 <template>
   <section>
     <h1>{{ header || "Welcome" }}</h1>
-    <input v-model="newItem" type="text" placeholder="Add an item" />
-    <label>
-      <input type="checkbox" v-model="newItemHighPriority" /> High Priority
-    </label>
+    <div class="add-item-form">
+      <input
+        @keyup.enter="saveItem"
+        type="text"
+        v-model="newItem"
+        placeholder="Add an item"
+      />
+      <label>
+        <input type="checkbox" v-model="newItemHighPriority" />
+        High Priority
+      </label>
+    </div>
     <br />
-    {{ newItem }} {{ newItemHighPriority }}
+    <button @click="saveItem" class="btn btn-primary">Save Item</button>
+    <br />
     <ul>
       <li v-for="item in items" :key="item.id">{{ item.label }}</li>
     </ul>
@@ -15,7 +24,7 @@
 <script>
 export default {
   data: () => ({
-    header: "Shopping List App",
+    header: "Shopping List",
     newItem: "",
     newItemHighPriority: false,
     items: [
@@ -24,5 +33,11 @@ export default {
       { id: 3, label: "20 cups" },
     ],
   }),
+  methods: {
+    saveItem() {
+      this.items.push({ id: this.items.length + 1, label: this.newItem });
+      this.newItem = "";
+    },
+  },
 };
 </script>
