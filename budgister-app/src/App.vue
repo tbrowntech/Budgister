@@ -28,3 +28,5 @@ nav a.router-link-exact-active {
   color: #42b983;
 }
 </style>
+
+<!--mongodb+srv://cluster0.avcgkkh.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority-->

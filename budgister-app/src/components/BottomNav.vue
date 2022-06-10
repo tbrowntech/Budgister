@@ -1,5 +1,5 @@
 <template>
-  <div class="hello">
+  <div class="bottomNav">
     <h1>{{ msg }}</h1>
     <p>
       To meet the creater, visit
