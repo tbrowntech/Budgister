@@ -19,7 +19,11 @@
           placeholder="Add an item"
         />
         <label>
-          <input type="checkbox" v-model="newItemHighPriority" />
+          <input
+            type="checkbox"
+            v-model="newItemHighPriority"
+            style="border: none; border-radius: none; box-shadow: none"
+          />
           High Priority
         </label>
         <button
@@ -48,7 +52,7 @@
 <script>
 export default {
   data: () => ({
-    header: "Shopping List App",
+    header: "Shopping List",
     editing: false,
     newItem: "",
     newItemHighPriority: false,
