@@ -13,7 +13,7 @@
     </div>
     <br />
     <div>
-      <button @click="$router.push('shoppingList')" class="btn btn-primary">
+      <button @click="$router.push('shoppinglist')" class="btn btn-primary">
         Shopping List
       </button>
     </div>

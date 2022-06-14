@@ -1,6 +1,6 @@
 <template>
-  <section>
-    <div class="container">
+  <section class="container">
+    <div>
       <table>
         <tr>
           <th>Due Date</th>

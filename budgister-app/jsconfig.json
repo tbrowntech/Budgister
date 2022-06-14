@@ -3,7 +3,7 @@
     "target": "es5",
     "module": "esnext",
     "baseUrl": "./",
-    "jsx": "react",
+    "jsx": "preserve",
     "moduleResolution": "node",
     "paths": {
       "@/*": [
