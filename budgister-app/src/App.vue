@@ -1,30 +1,15 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/main">Main</router-link>
-  </nav>
-  <router-view />
+  <section>
+    <h1>Budigster</h1>
+    <p class="center">The app to tell you where your money goes</p>
+    <div class="top-nav">
+      <button @click="$router.push('main')" class="btn btn-primary">
+        Main
+      </button>
+    </div>
+    <br />
+    <router-view />
+  </section>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+<!--mongodb+srv://cluster0.avcgkkh.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority-->

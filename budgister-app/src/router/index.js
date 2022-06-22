@@ -1,12 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
 
 const routes = [
-  {
-    path: "/",
-    name: "home",
-    component: HomeView,
-  },
   {
     path: "/main",
     name: "main",
@@ -23,14 +17,19 @@ const routes = [
     component: () => import("../components/RegisterPage.vue"),
   },
   {
-    path: "/shoppingList",
-    name: "shoppingList",
+    path: "/shoppinglist",
+    name: "shoppinglist",
     component: () => import("../components/ShoppingListPage.vue"),
   },
   {
     path: "/notes",
     name: "notes",
     component: () => import("../components/NotesPage.vue"),
+  },
+  {
+    path: "/editpage",
+    name: "edit",
+    component: () => import("../components/EditPage.vue"),
   },
 ];
 
