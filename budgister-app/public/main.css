@@ -6,3 +6,26 @@ table, th, td {
     display: flex;
     justify-content: center;
 }
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    padding: 1px;
+    background-color: blue;
+    align-content: center;
+    justify-content: center;
+}
+
+.grid-container > div {
+    background-color: rgb(107, 178, 240);
+    text-align: center;
+    margin: 1px;
+    padding: 20px;
+}
+
+#grid-title {
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: 20px;
+}
