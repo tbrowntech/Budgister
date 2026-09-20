@@ -1,0 +1,38 @@
+CREATE TABLE ListEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    createdAt INTEGER NOT NULL
+);
+
+CREATE TABLE ListItemEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    listId INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    isChecked INTEGER NOT NULL DEFAULT 0,
+    position INTEGER NOT NULL,
+    FOREIGN KEY(listId) REFERENCES ListEntity(id) ON DELETE CASCADE
+);
+
+selectAllLists:
+SELECT * FROM ListEntity ORDER BY createdAt DESC;
+
+insertList:
+INSERT INTO ListEntity(title, createdAt) VALUES (?, ?);
+
+deleteList:
+DELETE FROM ListEntity WHERE id = ?;
+
+selectItemsForList:
+SELECT * FROM ListItemEntity WHERE listId = ? ORDER BY position ASC;
+
+insertListItem:
+INSERT INTO ListItemEntity(listId, content, isChecked, position) VALUES (?, ?, ?, ?);
+
+updateItemChecked:
+UPDATE ListItemEntity SET isChecked = ? WHERE id = ?;
+
+deleteListItem:
+DELETE FROM ListItemEntity WHERE id = ?;
+
+lastInsertedListId:
+SELECT last_insert_rowid();
