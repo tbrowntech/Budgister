@@ -39,6 +39,7 @@ private enum class Screen {
 @Preview
 fun App(driverFactory: DatabaseDriverFactory) {
     val repository = remember { ListsRepository(driverFactory) }
+    val notesRepository = remember { NotesRepository(driverFactory) }
 
     MaterialTheme {
         var currentScreen by remember { mutableStateOf(Screen.Landing) }
@@ -57,9 +58,10 @@ fun App(driverFactory: DatabaseDriverFactory) {
             Screen.Budget -> PlaceholderScreen("Budget") {
                 currentScreen = Screen.Landing
             }
-            Screen.Notes -> PlaceholderScreen("Notes") {
-                currentScreen = Screen.Landing
-            }
+            Screen.Notes -> NotesScreen(
+                notesRepository,
+                onBack = { currentScreen = Screen.Landing }
+            )
         }
     }
 }
@@ -273,6 +275,145 @@ private fun ListDetailScreen(repository: ListsRepository, listId: Long, onBack: 
 
         Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
             Text("Back")
+        }
+    }
+}
+
+@Composable
+private fun NotesScreen(repository: NotesRepository, onBack: () -> Unit) {
+    val notes by repository.getAllNotes().collectAsState(initial = emptyList())
+    var selectedNoteId by remember { mutableStateOf<Long?>(null) }
+    var isCreatingNew by remember { mutableStateOf(false) }
+
+    if (isCreatingNew) {
+        NoteEditScreen(
+            repository = repository,
+            noteId = null,
+            onBack = { isCreatingNew = false }
+        )
+        return
+    }
+
+    if (selectedNoteId != null) {
+        NoteEditScreen(
+            repository = repository,
+            noteId = selectedNoteId,
+            onBack = { selectedNoteId = null }
+        )
+        return
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeContentPadding()
+            .padding(24.dp)
+    ) {
+        Text("Notes", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { isCreatingNew = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("New Note")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(notes) { note ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable { selectedNoteId = note.id },
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = note.title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = note.body.take(40) + if (note.body.length > 40) "..." else "",
+                            fontSize = 14.sp
+                        )
+                    }
+                    Button(onClick = { repository.deleteNote(note.id) }) {
+                        Text("Delete")
+                    }
+                }
+            }
+        }
+
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
+            Text("Back")
+        }
+    }
+}
+
+@Composable
+private fun NoteEditScreen(repository: NotesRepository, noteId: Long?, onBack: () -> Unit) {
+    val existingNote by if (noteId != null) {
+        repository.getNoteById(noteId).collectAsState(initial = null)
+    } else {
+        remember { mutableStateOf(null) }
+    }
+
+    var title by remember { mutableStateOf("") }
+    var body by remember { mutableStateOf("") }
+    var hasLoadedExisting by remember { mutableStateOf(false) }
+
+    if (existingNote != null && !hasLoadedExisting) {
+        title = existingNote!!.title
+        body = existingNote!!.body
+        hasLoadedExisting = true
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeContentPadding()
+            .padding(24.dp)
+    ) {
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("Title") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = body,
+            onValueChange = { body = it },
+            label = { Text("Note") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                if (title.isNotBlank() || body.isNotBlank()) {
+                    if (noteId != null) {
+                        repository.updateNote(noteId, title, body)
+                    } else {
+                        repository.createNote(title, body)
+                    }
+                }
+                onBack()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Save")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
+            Text("Cancel")
         }
     }
 }

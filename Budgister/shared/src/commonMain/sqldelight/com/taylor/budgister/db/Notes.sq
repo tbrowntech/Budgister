@@ -1,0 +1,22 @@
+CREATE TABLE NoteEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL
+);
+
+selectAllNotes:
+SELECT * FROM NoteEntity ORDER BY updatedAt DESC;
+
+selectNoteById:
+SELECT * FROM NoteEntity WHERE id = ?;
+
+insertNote:
+INSERT INTO NoteEntity(title, body, createdAt, updatedAt) VALUES (?, ?, ?, ?);
+
+updateNote:
+UPDATE NoteEntity SET title = ?, body = ?, updatedAt = ? WHERE id = ?;
+
+deleteNote:
+DELETE FROM NoteEntity WHERE id = ?;
