@@ -1,0 +1,45 @@
+CREATE TABLE BudgetCategoryEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    period TEXT NOT NULL,
+    sectionIndex INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    amount REAL NOT NULL,
+    position INTEGER NOT NULL
+);
+
+CREATE TABLE BudgetSectionLabelEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    period TEXT NOT NULL,
+    sectionIndex INTEGER NOT NULL,
+    label TEXT NOT NULL DEFAULT '',
+    UNIQUE(period, sectionIndex)
+);
+
+CREATE TABLE BudgetSettingsEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    period TEXT NOT NULL DEFAULT 'MONTHLY'
+);
+
+selectCategoriesForSection:
+SELECT * FROM BudgetCategoryEntity WHERE period = ? AND sectionIndex = ? ORDER BY position ASC;
+
+insertCategory:
+INSERT INTO BudgetCategoryEntity(period, sectionIndex, name, amount, position) VALUES (?, ?, ?, ?, ?);
+
+updateCategory:
+UPDATE BudgetCategoryEntity SET name = ?, amount = ? WHERE id = ?;
+
+deleteCategory:
+DELETE FROM BudgetCategoryEntity WHERE id = ?;
+
+selectLabel:
+SELECT * FROM BudgetSectionLabelEntity WHERE period = ? AND sectionIndex = ? LIMIT 1;
+
+upsertLabel:
+INSERT OR REPLACE INTO BudgetSectionLabelEntity(period, sectionIndex, label) VALUES (?, ?, ?);
+
+selectSettings:
+SELECT * FROM BudgetSettingsEntity WHERE id = 1 LIMIT 1;
+
+upsertSettings:
+INSERT OR REPLACE INTO BudgetSettingsEntity(id, period) VALUES (1, ?);

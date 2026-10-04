@@ -30,6 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 private enum class Screen {
     Landing, CheckRegister, Lists, Budget, Notes
@@ -40,6 +45,7 @@ private enum class Screen {
 fun App(driverFactory: DatabaseDriverFactory) {
     val repository = remember { ListsRepository(driverFactory) }
     val notesRepository = remember { NotesRepository(driverFactory) }
+    val budgetRepository = remember { BudgetRepository(driverFactory) }
 
     MaterialTheme {
         var currentScreen by remember { mutableStateOf(Screen.Landing) }
@@ -55,9 +61,10 @@ fun App(driverFactory: DatabaseDriverFactory) {
                 repository = repository,
                 onBack = { currentScreen = Screen.Landing }
             )
-            Screen.Budget -> PlaceholderScreen("Budget") {
-                currentScreen = Screen.Landing
-            }
+            Screen.Budget -> BudgetScreen(
+                repository = budgetRepository,
+                onBack = { currentScreen = Screen.Landing }
+            )
             Screen.Notes -> NotesScreen(
                 notesRepository,
                 onBack = { currentScreen = Screen.Landing }
@@ -415,5 +422,229 @@ private fun NoteEditScreen(repository: NotesRepository, noteId: Long?, onBack: (
         Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
             Text("Cancel")
         }
+    }
+}
+
+@Composable
+private fun BudgetScreen(repository: BudgetRepository, onBack: () -> Unit) {
+    val period by repository.getPeriod().collectAsState(initial = BudgetPeriod.MONTHLY)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeContentPadding()
+            .padding(24.dp)
+    ) {
+        Text("Budget", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Period", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
+            BudgetPeriod.entries.forEach { p ->
+                val label = when (p) {
+                    BudgetPeriod.WEEKLY -> "Weekly"
+                    BudgetPeriod.BI_MONTHLY -> "Bi-Monthly"
+                    BudgetPeriod.MONTHLY -> "Monthly"
+                }
+                Button(
+                    onClick = { repository.setPeriod(p) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 2.dp),
+                    colors = if (period == p) {
+                        ButtonDefaults.buttonColors()
+                    } else {
+                        ButtonDefaults.outlinedButtonColors()
+                    }
+                ) {
+                    Text(label, fontSize = 12.sp)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val sectionCount = when (period) {
+            BudgetPeriod.MONTHLY -> 1
+            BudgetPeriod.BI_MONTHLY -> 2
+            BudgetPeriod.WEEKLY -> 4
+        }
+
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(sectionCount) { index ->
+                BudgetSectionCard(
+                    repository = repository,
+                    period = period,
+                    sectionIndex = index,
+                    showLabelField = period != BudgetPeriod.MONTHLY
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+
+        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
+            Text("Back")
+        }
+    }
+}
+
+@Composable
+private fun BudgetSectionCard(
+    repository: BudgetRepository,
+    period: BudgetPeriod,
+    sectionIndex: Int,
+    showLabelField: Boolean
+) {
+    val categories by repository.getCategoriesForSection(period, sectionIndex)
+        .collectAsState(initial = emptyList())
+    val savedLabel by repository.getLabel(period, sectionIndex).collectAsState(initial = "")
+
+    var labelText by remember(period, sectionIndex) { mutableStateOf(savedLabel) }
+    var hasLoadedLabel by remember(period, sectionIndex) { mutableStateOf(false) }
+    if (!hasLoadedLabel) {
+        labelText = savedLabel
+        hasLoadedLabel = true
+    }
+
+    var newCategoryName by remember(period, sectionIndex) { mutableStateOf("") }
+    var newCategoryAmount by remember(period, sectionIndex) { mutableStateOf("") }
+    var editingCategoryId by remember(period, sectionIndex) { mutableStateOf<Long?>(null) }
+    var editName by remember(period, sectionIndex) { mutableStateOf("") }
+    var editAmount by remember(period, sectionIndex) { mutableStateOf("") }
+
+    val sectionTotal = categories.sumOf { it.amount }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+            .padding(12.dp)
+    ) {
+        if (showLabelField) {
+            OutlinedTextField(
+                value = labelText,
+                onValueChange = {
+                    labelText = it
+                    repository.setLabel(period, sectionIndex, it)
+                },
+                label = { Text(sectionDefaultLabel(period, sectionIndex)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        } else {
+            Text("Monthly Budget", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Text("Subtotal: $${"%.2f".format(sectionTotal)}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (editingCategoryId != null) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = editName,
+                    onValueChange = { editName = it },
+                    label = { Text("Category") },
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedTextField(
+                    value = editAmount,
+                    onValueChange = { editAmount = it },
+                    label = { Text("Amount") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.width(100.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = {
+                        val amountValue = editAmount.toDoubleOrNull() ?: 0.0
+                        if (editName.isNotBlank()) {
+                            repository.updateCategory(editingCategoryId!!, editName, amountValue)
+                        }
+                        editingCategoryId = null
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Save")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = { editingCategoryId = null },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Cancel")
+                }
+            }
+        } else {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = newCategoryName,
+                    onValueChange = { newCategoryName = it },
+                    label = { Text("Category") },
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedTextField(
+                    value = newCategoryAmount,
+                    onValueChange = { newCategoryAmount = it },
+                    label = { Text("Amount") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.width(100.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        val amountValue = newCategoryAmount.toDoubleOrNull() ?: 0.0
+                        if (newCategoryName.isNotBlank()) {
+                            repository.addCategory(period, sectionIndex, newCategoryName, amountValue, categories.size)
+                            newCategoryName = ""
+                            newCategoryAmount = ""
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Text("Add")
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        categories.forEach { category ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(category.name, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                Text("$${"%.2f".format(category.amount)}", fontSize = 14.sp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(onClick = {
+                    editingCategoryId = category.id
+                    editName = category.name
+                    editAmount = category.amount.toString()
+                }) {
+                    Text("Edit")
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Button(onClick = { repository.deleteCategory(category.id) }) {
+                    Text("X")
+                }
+            }
+        }
+    }
+}
+
+private fun sectionDefaultLabel(period: BudgetPeriod, index: Int): String {
+    return when (period) {
+        BudgetPeriod.BI_MONTHLY -> "Paycheck ${index + 1} date"
+        BudgetPeriod.WEEKLY -> "Week ${index + 1} date"
+        BudgetPeriod.MONTHLY -> ""
     }
 }
