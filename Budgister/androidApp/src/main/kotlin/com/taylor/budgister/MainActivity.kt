@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
@@ -17,10 +16,4 @@ class MainActivity : ComponentActivity() {
             App(driverFactory = DatabaseDriverFactory(applicationContext))
         }
     }
-}
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App(driverFactory = DatabaseDriverFactory(LocalContext.current))
 }

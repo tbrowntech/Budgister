@@ -1,0 +1,34 @@
+CREATE TABLE TransactionEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    transactionDate TEXT NOT NULL,
+    payee TEXT NOT NULL,
+    category TEXT NOT NULL,
+    amount REAL NOT NULL,
+    isCleared INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE RegisterSettingsEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    startingBalance REAL NOT NULL DEFAULT 0
+);
+
+selectAllTransactions:
+SELECT * FROM TransactionEntity ORDER BY transactionDate ASC, id ASC;
+
+insertTransaction:
+INSERT INTO TransactionEntity(transactionDate, payee, category, amount, isCleared) VALUES (?, ?, ?, ?, ?);
+
+updateTransaction:
+UPDATE TransactionEntity SET transactionDate = ?, payee = ?, category = ?, amount = ? WHERE id = ?;
+
+updateCleared:
+UPDATE TransactionEntity SET isCleared = ? WHERE id = ?;
+
+deleteTransaction:
+DELETE FROM TransactionEntity WHERE id = ?;
+
+selectSettings:
+SELECT * FROM RegisterSettingsEntity WHERE id = 1 LIMIT 1;
+
+upsertSettings:
+INSERT OR REPLACE INTO RegisterSettingsEntity(id, startingBalance) VALUES (1, ?);

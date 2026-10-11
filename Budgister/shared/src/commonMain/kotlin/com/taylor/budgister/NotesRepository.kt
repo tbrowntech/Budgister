@@ -22,12 +22,9 @@ class NotesRepository(driverFactory: DatabaseDriverFactory) {
         return queries.selectNoteById(id).asFlow().mapToOneOrNull(dispatcher)
     }
 
-    fun createNote(title: String, body: String): Long {
+    fun createNote(title: String, body: String) {
         val now = System.currentTimeMillis()
         queries.insertNote(title, body, now, now)
-        return queries.transactionWithResult {
-            queries.selectAllNotes().executeAsList().first().id
-        }
     }
 
     fun updateNote(id: Long, title: String, body: String) {

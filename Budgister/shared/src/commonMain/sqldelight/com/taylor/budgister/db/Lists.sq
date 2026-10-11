@@ -33,6 +33,3 @@ UPDATE ListItemEntity SET isChecked = ? WHERE id = ?;
 
 deleteListItem:
 DELETE FROM ListItemEntity WHERE id = ?;
-
-lastInsertedListId:
-SELECT last_insert_rowid();
