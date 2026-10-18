@@ -49,6 +49,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.launch
+import androidx.compose.material3.Surface
 
 private enum class Screen {
     Landing, CheckRegister, Lists, Budget, Notes
@@ -61,29 +62,34 @@ fun App(driverFactory: DatabaseDriverFactory) {
     val budgetRepository = remember { BudgetRepository(driverFactory) }
     val registerRepository = remember { RegisterRepository(driverFactory) }
 
-    MaterialTheme {
-        var currentScreen by remember { mutableStateOf(Screen.Landing) }
+    MaterialTheme(colorScheme = BudgisterColors) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            var currentScreen by remember { mutableStateOf(Screen.Landing) }
 
-        when (currentScreen) {
-            Screen.Landing -> LandingScreen(
-                onNavigate = { currentScreen = it }
-            )
-            Screen.CheckRegister -> CheckRegisterScreen(
-                repository = registerRepository,
-                onBack = { currentScreen = Screen.Landing }
-            )
-            Screen.Lists -> ListsScreen(
-                repository = repository,
-                onBack = { currentScreen = Screen.Landing }
-            )
-            Screen.Budget -> BudgetScreen(
-                repository = budgetRepository,
-                onBack = { currentScreen = Screen.Landing }
-            )
-            Screen.Notes -> NotesScreen(
-                notesRepository,
-                onBack = { currentScreen = Screen.Landing }
-            )
+            when (currentScreen) {
+                Screen.Landing -> LandingScreen(
+                    onNavigate = { currentScreen = it }
+                )
+                Screen.CheckRegister -> CheckRegisterScreen(
+                    repository = registerRepository,
+                    onBack = { currentScreen = Screen.Landing }
+                )
+                Screen.Lists -> ListsScreen(
+                    repository = repository,
+                    onBack = { currentScreen = Screen.Landing }
+                )
+                Screen.Budget -> BudgetScreen(
+                    repository = budgetRepository,
+                    onBack = { currentScreen = Screen.Landing }
+                )
+                Screen.Notes -> NotesScreen(
+                    notesRepository,
+                    onBack = { currentScreen = Screen.Landing }
+                )
+            }
         }
     }
 }
@@ -1031,8 +1037,7 @@ private fun CompactTextField(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)                    )
                 }
                 innerTextField()
             }
